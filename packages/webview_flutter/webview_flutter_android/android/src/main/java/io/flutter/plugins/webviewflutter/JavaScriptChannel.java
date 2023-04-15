@@ -40,18 +40,19 @@ public class JavaScriptChannel {
             });
   }
 
-  @JavascriptInterface
-  public void getExternalAuth(@NonNull final Map<String, Object> message) {
-    message.put("IName", "getExternalAuth");
-    JSONObject json = new JSONObject(message);
-    final Runnable postMessageRunnable =
-            () -> flutterApi.postMessage(JavaScriptChannel.this, json.toString(), reply -> {
-            });
+    @JavascriptInterface
+    public void getExternalAuth(final Map<String, Object> message) {
+        if (message == null) return;
+        message.put("IName", "getExternalAuth");
+        JSONObject json = new JSONObject(message);
+        final Runnable postMessageRunnable =
+                () -> flutterApi.postMessage(JavaScriptChannel.this, json.toString(), reply -> {
+                });
 
-    if (platformThreadHandler.getLooper() == Looper.myLooper()) {
-      postMessageRunnable.run();
-    } else {
-      platformThreadHandler.post(postMessageRunnable);
+        if (platformThreadHandler.getLooper() == Looper.myLooper()) {
+            postMessageRunnable.run();
+        } else {
+            platformThreadHandler.post(postMessageRunnable);
+        }
     }
-  }
 }
