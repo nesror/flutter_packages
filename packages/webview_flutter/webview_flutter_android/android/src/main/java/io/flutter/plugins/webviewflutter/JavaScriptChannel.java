@@ -10,9 +10,8 @@ import android.webkit.JavascriptInterface;
 
 import androidx.annotation.NonNull;
 
+import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.Map;
 
 /**
  * Added as a JavaScript interface to the WebView for any JavaScript channel that the Dart code sets
@@ -58,18 +57,22 @@ public class JavaScriptChannel {
     }
 
     @JavascriptInterface
-    public void getExternalAuth(final Map<String, Object> message) {
-        if (message == null) return;
-        message.put("IName", "getExternalAuth");
-        JSONObject json = new JSONObject(message);
-        final Runnable postMessageRunnable =
-                () -> flutterApi.postMessage(JavaScriptChannel.this, json.toString(), reply -> {
-                });
+    public void getExternalAuth(@NonNull final String message) {
+        try {
+            JSONObject json = new JSONObject(message);
+            json.put("IName", "getExternalAuth");
+            final Runnable postMessageRunnable =
+                    () -> flutterApi.postMessage(JavaScriptChannel.this, json.toString(), reply -> {
+                    });
 
-        if (platformThreadHandler.getLooper() == Looper.myLooper()) {
-            postMessageRunnable.run();
-        } else {
-            platformThreadHandler.post(postMessageRunnable);
+            if (platformThreadHandler.getLooper() == Looper.myLooper()) {
+                postMessageRunnable.run();
+            } else {
+                platformThreadHandler.post(postMessageRunnable);
+            }
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
+
     }
 }
