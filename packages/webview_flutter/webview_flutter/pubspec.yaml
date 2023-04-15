@@ -25,7 +25,7 @@ dependencies:
   webview_flutter_wkwebview: ^3.22.0
   webview_flutter_android:
     git:
-      url: git://github.com/nesror/flutter_packages.git
+      url: https://github.com/nesror/flutter_packages
       path: packages/webview_flutter/webview_flutter_android
 
 dev_dependencies:
