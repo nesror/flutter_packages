@@ -58,7 +58,8 @@ public class JavaScriptChannel {
     }
 
     @JavascriptInterface
-    public void getExternalAuth(@NonNull final Map<String, Object> message) {
+    public void getExternalAuth(final Map<String, Object> message) {
+        if (message == null) return;
         message.put("IName", "getExternalAuth");
         JSONObject json = new JSONObject(message);
         final Runnable postMessageRunnable =
