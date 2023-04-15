@@ -5,7 +5,12 @@
 package io.flutter.plugins.webviewflutter;
 
 import android.webkit.JavascriptInterface;
+
 import androidx.annotation.NonNull;
+
+import org.json.JSONObject;
+
+import java.util.Map;
 
 /**
  * Added as a JavaScript interface to the WebView for any JavaScript channel that the Dart code sets
@@ -33,5 +38,20 @@ public class JavaScriptChannel {
             () -> {
               api.postMessage(JavaScriptChannel.this, message, reply -> null);
             });
+  }
+
+  @JavascriptInterface
+  public void getExternalAuth(@NonNull final Map<String, Object> message) {
+    message.put("IName", "getExternalAuth");
+    JSONObject json = new JSONObject(message);
+    final Runnable postMessageRunnable =
+            () -> flutterApi.postMessage(JavaScriptChannel.this, json.toString(), reply -> {
+            });
+
+    if (platformThreadHandler.getLooper() == Looper.myLooper()) {
+      postMessageRunnable.run();
+    } else {
+      platformThreadHandler.post(postMessageRunnable);
+    }
   }
 }
