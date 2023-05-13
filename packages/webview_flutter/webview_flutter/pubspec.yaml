@@ -23,7 +23,7 @@ dependencies:
     git:
       url: https://github.com/nesror/flutter_packages
       path: packages/webview_flutter/webview_flutter_android
-  webview_flutter_platform_interface: ^2.0.0
+  webview_flutter_platform_interface: ^2.3.0
   webview_flutter_wkwebview: ^3.0.0
 
 dev_dependencies:
