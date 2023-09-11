@@ -18,7 +18,9 @@ import 'test_android_webview.g.dart';
   DownloadListener,
   JavaScriptChannel,
   TestCookieManagerHostApi,
+  TestCustomViewCallbackHostApi,
   TestDownloadListenerHostApi,
+  TestGeolocationPermissionsCallbackHostApi,
   TestInstanceManagerHostApi,
   TestJavaObjectHostApi,
   TestJavaScriptChannelHostApi,
@@ -887,6 +889,28 @@ void main() {
         expect(result, containsAllInOrder(<Object?>[mockWebView, 76]));
       });
 
+      test('onGeolocationPermissionsShowPrompt', () async {
+        const String origin = 'https://www.example.com';
+        final GeolocationPermissionsCallback callback =
+            GeolocationPermissionsCallback.detached();
+        final int paramsId = instanceManager.addDartCreatedInstance(callback);
+        late final GeolocationPermissionsCallback outerCallback;
+        when(mockWebChromeClient.onGeolocationPermissionsShowPrompt).thenReturn(
+          (String origin, GeolocationPermissionsCallback callback) async {
+            outerCallback = callback;
+          },
+        );
+        flutterApi.onGeolocationPermissionsShowPrompt(
+          mockWebChromeClientInstanceId,
+          paramsId,
+          origin,
+        );
+        await expectLater(
+          outerCallback,
+          callback,
+        );
+      });
+
       test('onShowFileChooser', () async {
         late final List<Object> result;
         when(mockWebChromeClient.onShowFileChooser).thenReturn(
@@ -1014,36 +1038,212 @@ void main() {
         expect(callbackParameters, <Object?>[instance, request]);
       });
 
+      test('onShowCustomView', () {
+        final InstanceManager instanceManager = InstanceManager(
+          onWeakReferenceRemoved: (_) {},
+        );
+
+        const int instanceIdentifier = 0;
+        late final List<Object?> callbackParameters;
+        final WebChromeClient instance = WebChromeClient.detached(
+          onShowCustomView: (
+            WebChromeClient instance,
+            View view,
+            CustomViewCallback callback,
+          ) {
+            callbackParameters = <Object?>[
+              instance,
+              view,
+              callback,
+            ];
+          },
+          instanceManager: instanceManager,
+        );
+        instanceManager.addHostCreatedInstance(instance, instanceIdentifier);
+
+        final WebChromeClientFlutterApiImpl flutterApi =
+            WebChromeClientFlutterApiImpl(
+          instanceManager: instanceManager,
+        );
+
+        final View view = View.detached(
+          instanceManager: instanceManager,
+        );
+        const int viewIdentifier = 50;
+        instanceManager.addHostCreatedInstance(view, viewIdentifier);
+
+        final CustomViewCallback callback = CustomViewCallback.detached(
+          instanceManager: instanceManager,
+        );
+        const int callbackIdentifier = 51;
+        instanceManager.addHostCreatedInstance(callback, callbackIdentifier);
+
+        flutterApi.onShowCustomView(
+          instanceIdentifier,
+          viewIdentifier,
+          callbackIdentifier,
+        );
+
+        expect(callbackParameters, <Object?>[
+          instance,
+          view,
+          callback,
+        ]);
+      });
+
+      test('onHideCustomView', () {
+        final InstanceManager instanceManager = InstanceManager(
+          onWeakReferenceRemoved: (_) {},
+        );
+
+        const int instanceIdentifier = 0;
+        late final List<Object?> callbackParameters;
+        final WebChromeClient instance = WebChromeClient.detached(
+          onHideCustomView: (
+            WebChromeClient instance,
+          ) {
+            callbackParameters = <Object?>[
+              instance,
+            ];
+          },
+          instanceManager: instanceManager,
+        );
+        instanceManager.addHostCreatedInstance(instance, instanceIdentifier);
+
+        final WebChromeClientFlutterApiImpl flutterApi =
+            WebChromeClientFlutterApiImpl(
+          instanceManager: instanceManager,
+        );
+
+        flutterApi.onHideCustomView(instanceIdentifier);
+
+        expect(callbackParameters, <Object?>[instance]);
+      });
+
       test('copy', () {
         expect(WebChromeClient.detached().copy(), isA<WebChromeClient>());
       });
     });
 
-    group('FileChooserParams', () {
-      test('FlutterApi create', () {
+    test('onGeolocationPermissionsHidePrompt', () {
+      final InstanceManager instanceManager = InstanceManager(
+        onWeakReferenceRemoved: (_) {},
+      );
+
+      const int instanceIdentifier = 0;
+      late final List<Object?> callbackParameters;
+      final WebChromeClient instance = WebChromeClient.detached(
+        onGeolocationPermissionsHidePrompt: (WebChromeClient instance) {
+          callbackParameters = <Object?>[instance];
+        },
+        instanceManager: instanceManager,
+      );
+      instanceManager.addHostCreatedInstance(instance, instanceIdentifier);
+
+      final WebChromeClientFlutterApiImpl flutterApi =
+          WebChromeClientFlutterApiImpl(instanceManager: instanceManager);
+
+      flutterApi.onGeolocationPermissionsHidePrompt(instanceIdentifier);
+
+      expect(callbackParameters, <Object?>[instance]);
+    });
+
+    test('copy', () {
+      expect(WebChromeClient.detached().copy(), isA<WebChromeClient>());
+    });
+  });
+
+  group('FileChooserParams', () {
+    test('FlutterApi create', () {
+      final InstanceManager instanceManager = InstanceManager(
+        onWeakReferenceRemoved: (_) {},
+      );
+
+      final FileChooserParamsFlutterApiImpl flutterApi =
+          FileChooserParamsFlutterApiImpl(
+        instanceManager: instanceManager,
+      );
+
+      flutterApi.create(
+        0,
+        false,
+        const <String>['my', 'list'],
+        FileChooserMode.openMultiple,
+        'filenameHint',
+      );
+
+      final FileChooserParams instance =
+          instanceManager.getInstanceWithWeakReference(0)! as FileChooserParams;
+      expect(instance.isCaptureEnabled, false);
+      expect(instance.acceptTypes, const <String>['my', 'list']);
+      expect(instance.mode, FileChooserMode.openMultiple);
+      expect(instance.filenameHint, 'filenameHint');
+    });
+
+    group('CustomViewCallback', () {
+      tearDown(() {
+        TestCustomViewCallbackHostApi.setup(null);
+      });
+
+      test('onCustomViewHidden', () async {
+        final MockTestCustomViewCallbackHostApi mockApi =
+            MockTestCustomViewCallbackHostApi();
+        TestCustomViewCallbackHostApi.setup(mockApi);
+
         final InstanceManager instanceManager = InstanceManager(
           onWeakReferenceRemoved: (_) {},
         );
 
-        final FileChooserParamsFlutterApiImpl flutterApi =
-            FileChooserParamsFlutterApiImpl(
+        final CustomViewCallback instance = CustomViewCallback.detached(
+          instanceManager: instanceManager,
+        );
+        const int instanceIdentifier = 0;
+        instanceManager.addHostCreatedInstance(instance, instanceIdentifier);
+
+        await instance.onCustomViewHidden();
+
+        verify(mockApi.onCustomViewHidden(instanceIdentifier));
+      });
+
+      test('FlutterAPI create', () {
+        final InstanceManager instanceManager = InstanceManager(
+          onWeakReferenceRemoved: (_) {},
+        );
+
+        final CustomViewCallbackFlutterApiImpl api =
+            CustomViewCallbackFlutterApiImpl(
           instanceManager: instanceManager,
         );
 
-        flutterApi.create(
-          0,
-          false,
-          const <String>['my', 'list'],
-          FileChooserModeEnumData(value: FileChooserMode.openMultiple),
-          'filenameHint',
+        const int instanceIdentifier = 0;
+
+        api.create(instanceIdentifier);
+
+        expect(
+          instanceManager.getInstanceWithWeakReference(instanceIdentifier),
+          isA<CustomViewCallback>(),
+        );
+      });
+    });
+
+    group('View', () {
+      test('FlutterAPI create', () {
+        final InstanceManager instanceManager = InstanceManager(
+          onWeakReferenceRemoved: (_) {},
         );
 
-        final FileChooserParams instance = instanceManager
-            .getInstanceWithWeakReference(0)! as FileChooserParams;
-        expect(instance.isCaptureEnabled, false);
-        expect(instance.acceptTypes, const <String>['my', 'list']);
-        expect(instance.mode, FileChooserMode.openMultiple);
-        expect(instance.filenameHint, 'filenameHint');
+        final ViewFlutterApiImpl api = ViewFlutterApiImpl(
+          instanceManager: instanceManager,
+        );
+
+        const int instanceIdentifier = 0;
+
+        api.create(instanceIdentifier);
+
+        expect(
+          instanceManager.getInstanceWithWeakReference(instanceIdentifier),
+          isA<View>(),
+        );
       });
     });
   });
@@ -1232,6 +1432,60 @@ void main() {
       await instance.deny();
 
       verify(mockApi.deny(instanceIdentifier));
+    });
+  });
+
+  group('GeolocationPermissionsCallback', () {
+    tearDown(() {
+      TestGeolocationPermissionsCallbackHostApi.setup(null);
+    });
+
+    test('invoke', () async {
+      final MockTestGeolocationPermissionsCallbackHostApi mockApi =
+          MockTestGeolocationPermissionsCallbackHostApi();
+      TestGeolocationPermissionsCallbackHostApi.setup(mockApi);
+
+      final InstanceManager instanceManager = InstanceManager(
+        onWeakReferenceRemoved: (_) {},
+      );
+
+      final GeolocationPermissionsCallback instance =
+          GeolocationPermissionsCallback.detached(
+        instanceManager: instanceManager,
+      );
+      const int instanceIdentifier = 0;
+      instanceManager.addHostCreatedInstance(instance, instanceIdentifier);
+
+      const String origin = 'testString';
+      const bool allow = true;
+      const bool retain = true;
+
+      await instance.invoke(
+        origin,
+        allow,
+        retain,
+      );
+
+      verify(mockApi.invoke(instanceIdentifier, origin, allow, retain));
+    });
+
+    test('Geolocation FlutterAPI create', () {
+      final InstanceManager instanceManager = InstanceManager(
+        onWeakReferenceRemoved: (_) {},
+      );
+
+      final GeolocationPermissionsCallbackFlutterApiImpl api =
+          GeolocationPermissionsCallbackFlutterApiImpl(
+        instanceManager: instanceManager,
+      );
+
+      const int instanceIdentifier = 0;
+      api.create(instanceIdentifier);
+
+      expect(
+        instanceManager.getInstanceWithWeakReference(instanceIdentifier),
+        isA<GeolocationPermissionsCallback>(),
+      );
     });
 
     test('FlutterAPI create', () {

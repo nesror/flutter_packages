@@ -1,3 +1,16 @@
+## 2.4.10
+
+* Adds pub topics to package metadata.
+* Updates minimum supported SDK version to Flutter 3.7/Dart 2.19.
+
+## 2.4.9
+
+* Bumps ExoPlayer version to 2.18.7.
+
+## 2.4.8
+
+* Bumps ExoPlayer version to 2.18.6.
+
 ## 2.4.7
 
 * Fixes Java warnings.

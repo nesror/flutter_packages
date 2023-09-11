@@ -7,6 +7,7 @@ package io.flutter.plugins.camerax;
 import android.app.Activity;
 import android.content.Context;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.LifecycleOwner;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
@@ -24,12 +25,12 @@ public final class CameraAndroidCameraxPlugin implements FlutterPlugin, Activity
   private VideoCaptureHostApiImpl videoCaptureHostApiImpl;
   private ImageAnalysisHostApiImpl imageAnalysisHostApiImpl;
   private ImageCaptureHostApiImpl imageCaptureHostApiImpl;
-  public SystemServicesHostApiImpl systemServicesHostApiImpl;
+  public @Nullable SystemServicesHostApiImpl systemServicesHostApiImpl;
 
-  @VisibleForTesting @NonNull
-  public ProcessCameraProviderHostApiImpl processCameraProviderHostApiImpl;
+  @VisibleForTesting
+  public @Nullable ProcessCameraProviderHostApiImpl processCameraProviderHostApiImpl;
 
-  @VisibleForTesting @NonNull public LiveDataHostApiImpl liveDataHostApiImpl;
+  @VisibleForTesting public @Nullable LiveDataHostApiImpl liveDataHostApiImpl;
 
   /**
    * Initialize this within the {@code #configureFlutterEngine} of a Flutter activity or fragment.
@@ -96,6 +97,16 @@ public final class CameraAndroidCameraxPlugin implements FlutterPlugin, Activity
         binaryMessenger, pendingRecordingHostApiImpl);
     videoCaptureHostApiImpl = new VideoCaptureHostApiImpl(binaryMessenger, instanceManager);
     GeneratedCameraXLibrary.VideoCaptureHostApi.setup(binaryMessenger, videoCaptureHostApiImpl);
+    GeneratedCameraXLibrary.ResolutionSelectorHostApi.setup(
+        binaryMessenger, new ResolutionSelectorHostApiImpl(instanceManager));
+    GeneratedCameraXLibrary.ResolutionStrategyHostApi.setup(
+        binaryMessenger, new ResolutionStrategyHostApiImpl(instanceManager));
+    GeneratedCameraXLibrary.AspectRatioStrategyHostApi.setup(
+        binaryMessenger, new AspectRatioStrategyHostApiImpl(instanceManager));
+    GeneratedCameraXLibrary.FallbackStrategyHostApi.setup(
+        binaryMessenger, new FallbackStrategyHostApiImpl(instanceManager));
+    GeneratedCameraXLibrary.QualitySelectorHostApi.setup(
+        binaryMessenger, new QualitySelectorHostApiImpl(instanceManager));
   }
 
   @Override

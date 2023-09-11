@@ -15,8 +15,10 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.platform.PlatformViewRegistry;
 import io.flutter.plugins.webviewflutter.GeneratedAndroidWebView.CookieManagerHostApi;
+import io.flutter.plugins.webviewflutter.GeneratedAndroidWebView.CustomViewCallbackHostApi;
 import io.flutter.plugins.webviewflutter.GeneratedAndroidWebView.DownloadListenerHostApi;
 import io.flutter.plugins.webviewflutter.GeneratedAndroidWebView.FlutterAssetManagerHostApi;
+import io.flutter.plugins.webviewflutter.GeneratedAndroidWebView.GeolocationPermissionsCallbackHostApi;
 import io.flutter.plugins.webviewflutter.GeneratedAndroidWebView.InstanceManagerHostApi;
 import io.flutter.plugins.webviewflutter.GeneratedAndroidWebView.JavaObjectHostApi;
 import io.flutter.plugins.webviewflutter.GeneratedAndroidWebView.JavaScriptChannelHostApi;
@@ -88,7 +90,7 @@ public class WebViewFlutterPlugin implements FlutterPlugin, ActivityAware {
     InstanceManagerHostApi.setup(binaryMessenger, () -> instanceManager.clear());
 
     viewRegistry.registerViewFactory(
-        "plugins.flutter.io/webview", new FlutterWebViewFactory(instanceManager));
+        "plugins.flutter.io/webview", new FlutterViewFactory(instanceManager));
 
     webViewHostApi =
         new WebViewHostApiImpl(
@@ -137,6 +139,11 @@ public class WebViewFlutterPlugin implements FlutterPlugin, ActivityAware {
       PermissionRequestHostApi.setup(
           binaryMessenger, new PermissionRequestHostApiImpl(binaryMessenger, instanceManager));
     }
+    GeolocationPermissionsCallbackHostApi.setup(
+        binaryMessenger,
+        new GeolocationPermissionsCallbackHostApiImpl(binaryMessenger, instanceManager));
+    CustomViewCallbackHostApi.setup(
+        binaryMessenger, new CustomViewCallbackHostApiImpl(binaryMessenger, instanceManager));
   }
 
   @Override
