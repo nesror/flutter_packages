@@ -1,5 +1,16 @@
-## NEXT
+## 1.0.12
 
+* Switches from using `ShortcutManager` to `ShortcutManagerCompat`.
+
+## 1.0.11
+
+* Updates minSdkVersion to 19.
+* Updates minimum supported SDK version to Flutter 3.16/Dart 3.2.
+* Updates compileSdk version to 34.
+
+## 1.0.10
+
+* Updates minimum required plugin_platform_interface version to 2.1.7.
 * Updates minimum supported SDK version to Flutter 3.10/Dart 3.0.
 
 ## 1.0.9
