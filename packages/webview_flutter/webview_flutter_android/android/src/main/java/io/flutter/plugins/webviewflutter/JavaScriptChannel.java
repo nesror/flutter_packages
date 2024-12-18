@@ -6,6 +6,8 @@ package io.flutter.plugins.webviewflutter;
 
 import android.webkit.JavascriptInterface;
 import androidx.annotation.NonNull;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Added as a JavaScript interface to the WebView for any JavaScript channel that the Dart code sets
