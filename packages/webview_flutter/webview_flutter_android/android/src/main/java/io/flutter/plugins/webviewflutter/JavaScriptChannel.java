@@ -45,7 +45,7 @@ public class JavaScriptChannel {
       api.getPigeonRegistrar()
               .runOnMainThread(
                       () -> {
-                        api.postMessage(JavaScriptChannel.this, message, reply -> null);
+                        api.postMessage(JavaScriptChannel.this, json.toString(), reply -> null);
                       });
     } catch (JSONException e) {
       throw new RuntimeException(e);
@@ -61,7 +61,7 @@ public class JavaScriptChannel {
       api.getPigeonRegistrar()
                 .runOnMainThread(
                         () -> {
-                            api.postMessage(JavaScriptChannel.this, message, reply -> null);
+                            api.postMessage(JavaScriptChannel.this, json.toString(), reply -> null);
                         });
     } catch (JSONException e) {
       throw new RuntimeException(e);
