@@ -34,4 +34,36 @@ public class JavaScriptChannel {
               api.postMessage(JavaScriptChannel.this, message, reply -> null);
             });
   }
+
+  @JavascriptInterface
+  public void getExternalAuth(@NonNull final String message) {
+    try {
+      JSONObject json = new JSONObject(message);
+      json.put("IName", "getExternalAuth");
+      api.getPigeonRegistrar()
+              .runOnMainThread(
+                      () -> {
+                        api.postMessage(JavaScriptChannel.this, message, reply -> null);
+                      });
+    } catch (JSONException e) {
+      throw new RuntimeException(e);
+    }
+
+  }
+
+  @JavascriptInterface
+  public void externalBus(@NonNull final String message) {
+    try {
+      JSONObject json = new JSONObject(message);
+      json.put("IName", "externalBus");
+      api.getPigeonRegistrar()
+                .runOnMainThread(
+                        () -> {
+                            api.postMessage(JavaScriptChannel.this, message, reply -> null);
+                        });
+    } catch (JSONException e) {
+      throw new RuntimeException(e);
+    }
+
+  }
 }
