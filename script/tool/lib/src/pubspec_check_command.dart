@@ -473,7 +473,7 @@ class PubspecCheckCommand extends PackageLoopingCommand {
     Version? minMinFlutterVersion,
   }) {
     String unknownDartVersionError(Version flutterVersion) {
-      return 'Dart SDK version for Fluter SDK version '
+      return 'Dart SDK version for Flutter SDK version '
           '$flutterVersion is unknown. '
           'Please update the map for getDartSdkForFlutterSdk with the '
           'corresponding Dart version.';
@@ -569,8 +569,10 @@ class PubspecCheckCommand extends PackageLoopingCommand {
       'test',
     };
     // Non-published packages like pigeon subpackages are allowed to violate
-    // the dev only dependencies rule.
-    if (pubspec.publishTo != 'none') {
+    // the dev only dependencies rule, as are packages that end in `_test` (as
+    // they are assumed to be intended to be used as dev_dependencies by
+    // clients).
+    if (pubspec.publishTo != 'none' && !pubspec.name.endsWith('_test')) {
       pubspec.dependencies.forEach((String name, Dependency dependency) {
         if (devOnlyDependencies.contains(name)) {
           misplacedDevDependencies.add(name);
@@ -583,7 +585,7 @@ class PubspecCheckCommand extends PackageLoopingCommand {
         '''
 The following unexpected non-local dependencies were found:
 ${badDependencies.map((String name) => '  $name').join('\n')}
-Please see https://github.com/flutter/flutter/wiki/Contributing-to-Plugins-and-Packages#Dependencies
+Please see https://github.com/flutter/flutter/blob/master/docs/ecosystem/contributing/README.md#Dependencies
 for more information and next steps.
 ''',
       if (misplacedDevDependencies.isNotEmpty)
@@ -612,7 +614,8 @@ Please move them to dev_dependencies.
       if (constraint is VersionRange &&
           constraint.min != null &&
           constraint.max != null &&
-          constraint.min == constraint.max) {
+          constraint.includeMin &&
+          constraint.includeMax) {
         return true;
       }
     }

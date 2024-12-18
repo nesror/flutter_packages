@@ -4,14 +4,8 @@
 
 package io.flutter.plugins.webviewflutter;
 
-import android.os.Handler;
-import android.os.Looper;
 import android.webkit.JavascriptInterface;
-
 import androidx.annotation.NonNull;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * Added as a JavaScript interface to the WebView for any JavaScript channel that the Dart code sets
@@ -21,78 +15,23 @@ import org.json.JSONObject;
  * code.
  */
 public class JavaScriptChannel {
-    private final Handler platformThreadHandler;
-    final String javaScriptChannelName;
-    private final JavaScriptChannelFlutterApiImpl flutterApi;
+  final String javaScriptChannelName;
+  private final JavaScriptChannelProxyApi api;
 
-    /**
-     * Creates a {@link JavaScriptChannel} that passes arguments of callback methods to Dart.
-     *
-     * @param flutterApi            the Flutter Api to which JS messages are sent
-     * @param channelName           JavaScript channel the message was sent through
-     * @param platformThreadHandler handles making callbacks on the desired thread
-     */
-    public JavaScriptChannel(
-            @NonNull JavaScriptChannelFlutterApiImpl flutterApi,
-            @NonNull String channelName,
-            @NonNull Handler platformThreadHandler) {
-        this.flutterApi = flutterApi;
-        this.javaScriptChannelName = channelName;
-        this.platformThreadHandler = platformThreadHandler;
-    }
+  /** Creates a {@link JavaScriptChannel} that passes arguments of callback methods to Dart. */
+  public JavaScriptChannel(@NonNull String channelName, @NonNull JavaScriptChannelProxyApi api) {
+    this.javaScriptChannelName = channelName;
+    this.api = api;
+  }
 
-    // Suppressing unused warning as this is invoked from JavaScript.
-    @SuppressWarnings("unused")
-    @JavascriptInterface
-    public void postMessage(@NonNull final String message) {
-        final Runnable postMessageRunnable =
-                () -> flutterApi.postMessage(JavaScriptChannel.this, message, reply -> {
-                });
-
-        if (platformThreadHandler.getLooper() == Looper.myLooper()) {
-            postMessageRunnable.run();
-        } else {
-            platformThreadHandler.post(postMessageRunnable);
-        }
-    }
-
-    @JavascriptInterface
-    public void getExternalAuth(@NonNull final String message) {
-        try {
-            JSONObject json = new JSONObject(message);
-            json.put("IName", "getExternalAuth");
-            final Runnable postMessageRunnable =
-                    () -> flutterApi.postMessage(JavaScriptChannel.this, json.toString(), reply -> {
-                    });
-
-            if (platformThreadHandler.getLooper() == Looper.myLooper()) {
-                postMessageRunnable.run();
-            } else {
-                platformThreadHandler.post(postMessageRunnable);
-            }
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-
-    }
-
-    @JavascriptInterface
-    public void externalBus(@NonNull final String message) {
-        try {
-            JSONObject json = new JSONObject(message);
-            json.put("IName", "externalBus");
-            final Runnable postMessageRunnable =
-                    () -> flutterApi.postMessage(JavaScriptChannel.this, json.toString(), reply -> {
-                    });
-
-            if (platformThreadHandler.getLooper() == Looper.myLooper()) {
-                postMessageRunnable.run();
-            } else {
-                platformThreadHandler.post(postMessageRunnable);
-            }
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-
-    }
+  // Suppressing unused warning as this is invoked from JavaScript.
+  @SuppressWarnings("unused")
+  @JavascriptInterface
+  public void postMessage(@NonNull final String message) {
+    api.getPigeonRegistrar()
+        .runOnMainThread(
+            () -> {
+              api.postMessage(JavaScriptChannel.this, message, reply -> null);
+            });
+  }
 }

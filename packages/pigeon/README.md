@@ -17,13 +17,16 @@ Currently pigeon supports generating:
 * Kotlin and Java code for Android
 * Swift and Objective-C code for iOS and macOS
 * C++ code for Windows
+* GObject code for Linux
 
 ### Supported Datatypes
 
 Pigeon uses the `StandardMessageCodec` so it supports 
-[any datatype platform channels support](https://flutter.dev/docs/development/platform-integration/platform-channels#codec).
+[any datatype platform channels support](https://flutter.dev/to/platform-channels-codec).
 
 Custom classes, nested datatypes, and enums are also supported. 
+
+Basic inheritance with empty `sealed` parent classes is allowed only in the Swift, Kotlin, and Dart generators.
 
 Nullable enums in Objective-C generated code will be wrapped in a class to allow for nullability.
 
@@ -53,8 +56,7 @@ should be returned via the provided callback.
 To pass custom details into `PlatformException` for error handling, 
 use `FlutterError` in your Host API. [Example](./example/README.md#HostApi_Example).
 
-To use `FlutterError` in Swift you must first extend a standard error.
-[Example](./example/README.md#AppDelegate.swift).
+For swift, use `PigeonError` instead of `FlutterError` when throwing an error. See [Example#Swift](./example/README.md#Swift) for more details.
 
 #### Objective-C and C++
 
@@ -86,7 +88,7 @@ to the api to allow for multiple instances to be created and operate in parallel
 1) Make a ".dart" file outside of your "lib" directory for defining the
    communication interface.
 1) Run pigeon on your ".dart" file to generate the required Dart and
-   host-language code: `flutter pub get` then `flutter pub run pigeon`
+   host-language code: `flutter pub get` then `dart run pigeon`
    with suitable arguments. [Example](./example/README.md#Invocation).
 1) Add the generated Dart code to `./lib` for compilation.
 1) Implement the host-language code and add it to your build (see below).
@@ -104,9 +106,10 @@ to the api to allow for multiple instances to be created and operate in parallel
 1) Method declarations on the API classes should have arguments and a return
    value whose types are defined in the file, are supported datatypes, or are
    `void`.
-1) Generics are supported, but can currently only be used with nullable types
-   (example: `List<int?>`).
-1) Objc and Swift have special naming conventions that can be utilized with the
+1) Event channels are supported only on the Swift, Kotlin, and Dart generators.
+1) Event channel methods should be wrapped in an `abstract class` with the metadata `@EventChannelApi`.
+1) Event channel definitions should not include the `Stream` return type, just the type that is being streamed.
+1) Objective-C and Swift have special naming conventions that can be utilized with the
    `@ObjCSelector` and `@SwiftFunction` respectively. 
 
 ### Flutter calling into iOS steps
@@ -136,6 +139,13 @@ to the api to allow for multiple instances to be created and operate in parallel
    (e.g. `macos/Runner.xcworkspace` or `.podspec`).
 1) Implement the generated protocol for handling the calls on macOS, set it up
    as the handler for the messages.
+
+### Flutter calling into Linux steps
+
+1) Add the generated GObject code to your `./linux` directory for compilation, and
+   to your `linux/CMakeLists.txt` file.
+1) Implement the generated protocol for handling the calls on Linux, set it up
+   as the vtable for the API object.
 
 ### Calling into Flutter from the host platform
 
