@@ -39,43 +39,35 @@ public class JavaScriptChannel {
             });
   }
 
-    @JavascriptInterface
-    public void getExternalAuth(@NonNull final String message) {
-        try {
-            JSONObject json = new JSONObject(message);
-            json.put("IName", "getExternalAuth");
-            final Runnable postMessageRunnable =
-                    () -> flutterApi.postMessage(JavaScriptChannel.this, json.toString(), reply -> {
-                    });
-
-            if (platformThreadHandler.getLooper() == Looper.myLooper()) {
-                postMessageRunnable.run();
-            } else {
-                platformThreadHandler.post(postMessageRunnable);
-            }
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-
+  @JavascriptInterface
+  public void getExternalAuth(@NonNull final String message) {
+    try {
+      JSONObject json = new JSONObject(message);
+      json.put("IName", "getExternalAuth");
+      api.getPigeonRegistrar()
+              .runOnMainThread(
+                      () -> {
+                        api.postMessage(JavaScriptChannel.this, message, reply -> null);
+                      });
+    } catch (JSONException e) {
+      throw new RuntimeException(e);
     }
 
-    @JavascriptInterface
-    public void externalBus(@NonNull final String message) {
-        try {
-            JSONObject json = new JSONObject(message);
-            json.put("IName", "externalBus");
-            final Runnable postMessageRunnable =
-                    () -> flutterApi.postMessage(JavaScriptChannel.this, json.toString(), reply -> {
-                    });
+  }
 
-            if (platformThreadHandler.getLooper() == Looper.myLooper()) {
-                postMessageRunnable.run();
-            } else {
-                platformThreadHandler.post(postMessageRunnable);
-            }
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-
+  @JavascriptInterface
+  public void externalBus(@NonNull final String message) {
+    try {
+      JSONObject json = new JSONObject(message);
+      json.put("IName", "externalBus");
+      api.getPigeonRegistrar()
+                .runOnMainThread(
+                        () -> {
+                            api.postMessage(JavaScriptChannel.this, message, reply -> null);
+                        });
+    } catch (JSONException e) {
+      throw new RuntimeException(e);
     }
+
+  }
 }
