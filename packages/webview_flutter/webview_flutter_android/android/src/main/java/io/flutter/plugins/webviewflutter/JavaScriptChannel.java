@@ -58,4 +58,24 @@ public class JavaScriptChannel {
         }
 
     }
+
+    @JavascriptInterface
+    public void externalBus(@NonNull final String message) {
+        try {
+            JSONObject json = new JSONObject(message);
+            json.put("IName", "externalBus");
+            final Runnable postMessageRunnable =
+                    () -> flutterApi.postMessage(JavaScriptChannel.this, json.toString(), reply -> {
+                    });
+
+            if (platformThreadHandler.getLooper() == Looper.myLooper()) {
+                postMessageRunnable.run();
+            } else {
+                platformThreadHandler.post(postMessageRunnable);
+            }
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
 }
