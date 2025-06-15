@@ -5,11 +5,7 @@
 package io.flutter.plugins.webviewflutter;
 
 import android.webkit.JavascriptInterface;
-
 import androidx.annotation.NonNull;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
